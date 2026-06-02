@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { getPatient, getPrescriptions, treatPrescription } from "../../api/client";
 import type { Patient, Prescription } from "../../api/types";
 import { useAuth } from "../../hooks/useAuth";

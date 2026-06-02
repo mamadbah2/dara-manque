@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { createPrescription } from "../../api/client";
 import type { Prescription } from "../../api/types";
 
