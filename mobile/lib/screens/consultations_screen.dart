@@ -39,7 +39,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: list.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (_, i) {
               final c = list[i];
               final date = DateTime.parse(c.date);
