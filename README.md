@@ -1,120 +1,132 @@
-Voici une proposition complète de `README.md` structurée pour servir de véritable fil conducteur à la réalisation de votre application "Dara Manqué". Les choix technologiques proposés s'inscrivent parfaitement dans une architecture distribuée moderne, robuste et taillée pour un projet de cette envergure.
+# Dara Manqué — Smart Health Card
 
----
+A digital health record system that replaces the traditional paper health booklet with a smart NFC card. Each card is linked to a patient and acts as a secure access key — all medical data resides server-side.
 
-# 🏥 Dara Manqué — Smart Health Card
+## Architecture
 
-## 📖 Contexte et Description
+```
+dara-manque/
+├── backend/    # FastAPI REST API + PostgreSQL
+├── web/        # React + Vite portal (Doctor & Pharmacist)
+└── mobile/     # Flutter app (Patient)
+```
 
-**Dara Manqué** est une implémentation spécifique et innovante du projet transversal. Ce système dématérialise complètement le carnet de santé traditionnel en le remplaçant par une carte NFC intelligente.
+## Actors
 
-Chaque carte est liée de manière unique à un patient, agissant comme une clé d'accès sécurisée. Pour des raisons de sécurité et de fiabilité, aucune donnée médicale n'est stockée sur la carte physique ; l'ensemble des dossiers, historiques et ordonnances réside de manière sécurisée sur une base de données côté serveur. Le système fait le pont entre les technologies monétiques (paiement NFC), la cybersécurité (chiffrement) et la gestion des systèmes d'information hospitaliers.
+| Actor | Interface | Key Features |
+|---|---|---|
+| **Patient** | Flutter mobile | Identify by card ID, view prescriptions & consultations |
+| **Doctor** | React web | Search patient, view full record, create prescriptions |
+| **Pharmacist** | React web | View active prescriptions, mark as treated |
 
-## 👥 Acteurs et Fonctionnalités Clés
+> **MVP note:** The NFC card is currently simulated by a numeric patient ID. Real NFC integration is planned for a future release.
 
-### 1. Le Patient (Utilisateur Mobile)
+## Tech Stack
 
-* Dispose de la carte NFC personnelle.
-* 
-**Application Mobile :** Permet de scanner sa propre carte avec son smartphone pour consulter son historique de consultations, ses ordonnances en cours, le solde de son porte-monnaie électronique et ses prochains rendez-vous.
+| Layer | Technology |
+|---|---|
+| Backend | Python 3.12, FastAPI, SQLAlchemy 2.0, Alembic, PostgreSQL |
+| Auth | JWT (python-jose) + bcrypt (passlib) |
+| Web frontend | React 18, TypeScript, Vite, axios, react-router-dom |
+| Mobile | Flutter 3.44, Dart, http package |
 
+## Prerequisites
 
+- Python 3.11+
+- Node.js 18+
+- Flutter 3.x SDK
+- PostgreSQL 15+ (or Docker)
 
-### 2. Le Médecin (Utilisateur Web)
+## Getting Started
 
-* 
-**Application Web :** Se connecte avec son compte après qu'un patient a scanné sa carte sur le lecteur.
+### 1. Start PostgreSQL
 
+**With Docker (recommended):**
+```bash
+docker run -d --name dara_postgres --network host \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  postgres:16
 
-* Accède au dossier médical complet : historique, maladies chroniques, allergies, anciennes ordonnances.
+docker exec dara_postgres psql -U postgres -c "CREATE DATABASE dara_manque;"
+docker exec dara_postgres psql -U postgres -c "CREATE DATABASE test_dara_manque;"
+```
 
+> **Note (snap Docker on Ubuntu):** Use `--network host` to avoid the snap docker-proxy TCP bug. The backend connects to `localhost:5432` directly.
 
-* Rédige de nouvelles ordonnances numériques et planifie des rendez-vous.
+### 2. Backend
 
+```bash
+cd backend
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env          # set a strong SECRET_KEY in production
+alembic upgrade head
+python3 seed.py               # loads demo data
+fastapi dev app/main.py
+```
 
+API available at `http://localhost:8000` — Swagger UI at `http://localhost:8000/docs`
 
-### 3. Le Pharmacien (Utilisateur Web)
+### 3. Web Frontend
 
-* 
-**Application Web :** Accède uniquement aux ordonnances actives du patient.
+```bash
+cd web
+npm install
+npm run dev
+```
 
+Portal available at `http://localhost:5173`
 
-* Encaisse le paiement des médicaments via la fonctionnalité de paiement NFC de la carte.
+### 4. Mobile App
 
+```bash
+cd mobile
+flutter pub get
+flutter run                   # requires Android emulator or connected device
+```
 
-* Marque l'ordonnance comme "traitée" pour empêcher toute double utilisation.
+> On Android emulator, the backend is reachable at `http://10.0.2.2:8000`.  
+> On a physical device, edit `_baseUrl` in `lib/api/client.dart` to your machine's LAN IP.
 
+## Demo Credentials
 
+After running `python3 seed.py` in the `backend/` directory:
 
----
+| Role | Email | Password |
+|---|---|---|
+| Doctor | `doctor@dara.com` | `password123` |
+| Pharmacist | `pharmacist@dara.com` | `password123` |
+| Patient ID | `1001` | *(no login — enter ID directly in the app)* |
 
-## 🛠️ Stack Technologique Recommandée
+## API Overview
 
-Pour répondre aux exigences de sécurité, de performance et pour adopter une architecture distribuée (Backend API / Frontend Web / Frontend Mobile), voici la stack moderne recommandée :
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/auth/login` | — | Login, returns JWT + role |
+| GET | `/patients/{id}` | — | Patient record |
+| GET | `/patients/{id}/consultations` | — | Consultation history |
+| GET | `/patients/{id}/prescriptions` | — | Active prescriptions |
+| POST | `/patients/{id}/prescriptions` | Doctor | Create prescription |
+| PATCH | `/prescriptions/{id}/treat` | Pharmacist | Mark prescription as treated |
 
-### Backend (API REST & Logique Métier)
+## Running Tests
 
-* **Framework :** **Spring Boot (Java)**. Excellent pour la sécurité, la gestion des transactions complexes et l'intégration d'architectures robustes.
-* **Base de données :** **MongoDB Atlas** (pour la flexibilité des dossiers médicaux sous forme de documents) ou **PostgreSQL** (pour les transactions financières et la gestion stricte des relations).
-* 
-**Sécurité :** Spring Security avec JWT (JSON Web Tokens) pour l'authentification des requêtes, couplé à un chiffrement AES pour les données sensibles.
+```bash
+cd backend
+source venv/bin/activate
+pytest tests/ -v
+```
 
+Requires the `test_dara_manque` database to exist (created in step 1 above). All 16 tests should pass.
 
+## Known MVP Limitations
 
-### Frontend (Interfaces Utilisateurs)
-
-* **Portail Web (Médecins & Pharmaciens) :** **Angular**. Framework idéal pour les applications d'entreprise et les tableaux de bord de gestion complexes.
-* **Application Mobile (Patients) :** **Flutter**. Permet de compiler une application native performante (iOS/Android) avec une excellente gestion du module NFC du smartphone.
-
-### Infrastructure & DevOps
-
-* **Conteneurisation :** **Docker** (pour isoler l'API et la base de données) et **Kubernetes** pour l'orchestration si le système évolue à grande échelle.
-* **Hébergement & CI/CD :** **Vercel** (pour le frontend Angular), **Render** ou une VM cloud (pour le backend Spring Boot).
-* **Qualité de code :** **SonarCloud** pour l'analyse continue des vulnérabilités de sécurité et de la qualité du code.
-
----
-
-## 🗺️ Ligne Directrice d'Implémentation (Roadmap)
-
-Ce projet se divise en plusieurs phases d'implémentation logique :
-
-### Phase 1 : Conception & Architecture 
-
-1. Mise en place des dépôts Git (Backend, Frontend Web, Frontend Mobile).
-2. Configuration des environnements de développement et de la base de données.
-3. Modélisation finale de la base de données (entités : Patient, Médecin, Pharmacien, Ordonnance, Rendez-vous) à partir du diagramme de classes.
-
-### Phase 2 : Core Backend & API 
-
-1. Développement de l'API REST avec Spring Boot.
-2. Mise en place de l'authentification (Médecins / Pharmaciens).
-3. Création des endpoints de gestion : CRUD pour les dossiers médicaux, création d'ordonnances, validation de paiement.
-4. Implémentation de la logique d'invalidation des ordonnances (statut actif/inactif).
-
-
-
-### Phase 3 : Interfaces Web & Mobile
-
-1. **Dashboard Angular :** Création des vues Médecin (consultation dossier, formulaire d'ordonnance) et Pharmacien (liste ordonnances actives, bouton d'encaissement).
-2. 
-**App Flutter :** Création de l'interface patient (Historique, RDV, Solde).
-
-
-
-### Phase 4 : Intégration NFC & Sécurité
-
-1. Intégration de la lecture NFC côté Frontend (Web via lecteur externe, Mobile via lecteur natif du téléphone).
-2. Liaison de l'UID (identifiant unique) de la carte NFC au backend pour déclencher l'interface de connexion.
-
-
-3. Tests de sécurité (protection contre le clonage et les attaques de rejeu).
-
-
-
----
-
-## 🧠 Note sur l'Intelligence Artificielle (Hors Périmètre App Core)
-
-Conformément à l'architecture du système, les modules d'Intelligence Artificielle requis (Détection de fraude via *Isolation Forest*, Analyse comportementale via *Random Forest*, et Prédiction d'affluence via *Réseau de neurones*)  sont **découplés** de l'application principale.
-
-Leur implémentation dépend de l'entraînement de modèles spécifiques (généralement en Python/TensorFlow). L'application web/mobile se contentera d'envoyer et de recevoir des données de ces modèles via des points d'API dédiés (ex: une alerte si l'API IA renvoie une anomalie lors d'une transaction), sans avoir à gérer la logique d'entraînement en interne.
+| Limitation | Notes |
+|---|---|
+| No patient authentication | Patient endpoints are public by design (NFC simulation) — add patient auth before production |
+| JWT in localStorage | Vulnerable to XSS — switch to `httpOnly` cookies in production |
+| No doctor-patient relationship | Any doctor can create prescriptions for any patient |
+| No NFC card integration | Uses numeric ID; Flutter `nfc_manager` can be added for real NFC |
+| No appointment scheduling | Out of MVP scope |
+| AI modules not integrated | Fraud detection, behavioral analysis, and flow prediction are planned as separate microservices |
