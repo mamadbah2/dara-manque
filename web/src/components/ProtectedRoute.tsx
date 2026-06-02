@@ -1,8 +1,9 @@
+import type { ReactElement } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 interface Props {
-  children: JSX.Element;
+  children: ReactElement;
   allowedRole: "doctor" | "pharmacist";
 }
 
