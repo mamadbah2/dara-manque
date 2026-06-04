@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'models.dart';
 
-// Android emulator uses 10.0.2.2 to reach host machine localhost.
-// Change to your LAN IP for physical device testing.
-const String _baseUrl = 'http://10.0.2.2:8000';
+// Linux desktop: localhost. Android emulator: 10.0.2.2. Physical device: LAN IP.
+const String _baseUrl = 'http://localhost:9000';
 
 Future<Patient> fetchPatient(int id) async {
   final res = await http.get(Uri.parse('$_baseUrl/patients/$id'));
