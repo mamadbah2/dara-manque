@@ -1,9 +1,9 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import PatientRecord from "./PatientRecord";
-import { useAuth } from "../../hooks/useAuth";
+import AppShell from "../../components/AppShell";
 
 export default function DoctorDashboard() {
-  const { signOut } = useAuth();
   const [inputId, setInputId] = useState("");
   const [patientId, setPatientId] = useState<number | null>(null);
 
@@ -14,29 +14,36 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h1 style={{ fontSize: 20 }}>Espace Médecin</h1>
-        <button onClick={signOut} style={{ padding: "6px 12px", border: "1px solid #ccc", borderRadius: 4, background: "#fff" }}>
-          Déconnexion
-        </button>
-      </div>
-
+    <AppShell role="doctor">
       {!patientId ? (
-        <form onSubmit={handleSearch} style={{ display: "flex", gap: 8 }}>
-          <input
-            type="number" value={inputId} onChange={e => setInputId(e.target.value)}
-            placeholder="ID du patient (ex: 1001)"
-            required
-            style={{ flex: 1, padding: 8, border: "1px solid #ccc", borderRadius: 4 }}
-          />
-          <button type="submit" style={{ padding: "8px 16px", background: "#1a73e8", color: "#fff", border: "none", borderRadius: 4 }}>
-            Rechercher
-          </button>
-        </form>
+        <div style={{ display: "flex", justifyContent: "center", paddingTop: 40 }}>
+          <div className="card" style={{ width: "100%", maxWidth: 480 }}>
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <div style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                width: 48, height: 48, borderRadius: "50%",
+                background: "var(--primary-light)", marginBottom: 12,
+              }}>
+                <span style={{ fontSize: 22 }}>🔍</span>
+              </div>
+              <h2 style={{ fontSize: 18, fontWeight: 600 }}>Rechercher un patient</h2>
+              <p className="text-muted" style={{ marginTop: 4 }}>Entrez le numéro de carte du patient</p>
+            </div>
+            <form onSubmit={handleSearch} style={{ display: "flex", gap: 10 }}>
+              <input
+                className="input"
+                type="number" value={inputId} onChange={e => setInputId(e.target.value)}
+                placeholder="Ex : 1001" required
+              />
+              <button className="btn btn-primary" type="submit" style={{ whiteSpace: "nowrap" }}>
+                Rechercher
+              </button>
+            </form>
+          </div>
+        </div>
       ) : (
-        <PatientRecord patientId={patientId} onBack={() => setPatientId(null)} />
+        <PatientRecord patientId={patientId} onBack={() => { setPatientId(null); setInputId(""); }} />
       )}
-    </div>
+    </AppShell>
   );
 }

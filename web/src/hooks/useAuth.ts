@@ -12,6 +12,7 @@ export function useAuth() {
     const res = await apiLogin(email, password);
     localStorage.setItem("token", res.data.access_token);
     localStorage.setItem("role", res.data.role);
+    localStorage.setItem("email", email);
     setRole(res.data.role);
     return res.data.role;
   }, []);
@@ -19,6 +20,7 @@ export function useAuth() {
   const signOut = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem("email");
     setRole(null);
   }, []);
 

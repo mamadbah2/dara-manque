@@ -26,27 +26,69 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-      <form onSubmit={handleSubmit} style={{ background: "#fff", padding: 32, borderRadius: 8, width: 360, boxShadow: "0 2px 8px rgba(0,0,0,.1)" }}>
-        <h1 style={{ marginBottom: 24, fontSize: 22 }}>Dara Manqué</h1>
-        {error && <p style={{ color: "red", marginBottom: 12 }}>{error}</p>}
-        <label style={{ display: "block", marginBottom: 4 }}>Email</label>
-        <input
-          type="email" value={email} onChange={e => setEmail(e.target.value)}
-          required style={{ width: "100%", padding: 8, marginBottom: 16, border: "1px solid #ccc", borderRadius: 4 }}
-        />
-        <label style={{ display: "block", marginBottom: 4 }}>Mot de passe</label>
-        <input
-          type="password" value={password} onChange={e => setPassword(e.target.value)}
-          required style={{ width: "100%", padding: 8, marginBottom: 24, border: "1px solid #ccc", borderRadius: 4 }}
-        />
-        <button
-          type="submit" disabled={loading}
-          style={{ width: "100%", padding: 10, background: "#1a73e8", color: "#fff", border: "none", borderRadius: 4, fontSize: 16 }}
-        >
-          {loading ? "Connexion..." : "Se connecter"}
-        </button>
-      </form>
+    <div style={{
+      display: "flex", justifyContent: "center", alignItems: "center",
+      minHeight: "100vh", background: "var(--bg)", padding: 16,
+    }}>
+      <div style={{ width: "100%", maxWidth: 420 }}>
+        <div className="card" style={{ padding: 40 }}>
+          {/* Logo */}
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              width: 56, height: 56, borderRadius: "50%",
+              background: "var(--primary-light)", marginBottom: 12,
+            }}>
+              <span style={{ fontSize: 28, color: "var(--primary)", fontWeight: 700 }}>✚</span>
+            </div>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)" }}>Dara Manqué</h1>
+            <p className="text-muted" style={{ marginTop: 4 }}>Portail professionnel</p>
+          </div>
+
+          {error && (
+            <div className="alert alert-error" style={{ marginBottom: 20 }}>{error}</div>
+          )}
+
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="email">Email</label>
+              <input
+                id="email"
+                className="input"
+                type="email" value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="votre@email.com" required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="password">Mot de passe</label>
+              <input
+                id="password"
+                className="input"
+                type="password" value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••" required
+              />
+            </div>
+            <button
+              className="btn btn-primary btn-full"
+              type="submit" disabled={loading}
+              style={{ marginTop: 4, padding: "12px 20px", fontSize: 15 }}
+            >
+              {loading ? "Connexion..." : "Se connecter"}
+            </button>
+          </form>
+
+          {/* Hint démo */}
+          <div style={{
+            marginTop: 28, padding: 12,
+            background: "var(--bg)", borderRadius: "var(--radius-sm)",
+            fontSize: 12, color: "var(--text-muted)",
+          }}>
+            <strong style={{ display: "block", marginBottom: 4 }}>Accès démo :</strong>
+            <span>Médecin — doctor@dara.com / password123</span><br />
+            <span>Pharmacien — pharmacist@dara.com / password123</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
