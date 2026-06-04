@@ -77,16 +77,18 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Hint démo */}
-          <div style={{
-            marginTop: 28, padding: 12,
-            background: "var(--bg)", borderRadius: "var(--radius-sm)",
-            fontSize: 12, color: "var(--text-muted)",
-          }}>
-            <strong style={{ display: "block", marginBottom: 4 }}>Accès démo :</strong>
-            <span>Médecin — doctor@dara.com / password123</span><br />
-            <span>Pharmacien — pharmacist@dara.com / password123</span>
-          </div>
+          {/* Hint démo — visible uniquement en développement local */}
+          {import.meta.env.DEV && (
+            <div style={{
+              marginTop: 28, padding: 12,
+              background: "var(--bg)", borderRadius: "var(--radius-sm)",
+              fontSize: 12, color: "var(--text-muted)",
+            }}>
+              <strong style={{ display: "block", marginBottom: 4 }}>Accès démo :</strong>
+              <span>Médecin — doctor@dara.com / password123</span><br />
+              <span>Pharmacien — pharmacist@dara.com / password123</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
