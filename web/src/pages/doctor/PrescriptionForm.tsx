@@ -56,7 +56,8 @@ export default function PrescriptionForm({ patientId, onCreated }: Props) {
       setSuccess(true);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
-        setConflicts(err.response.data.detail.conflicts);
+        const raw = err.response.data?.detail?.conflicts;
+        if (Array.isArray(raw)) setConflicts(raw);
         setError("Conflit d'allergie détecté — confirmez pour prescrire malgré tout.");
       } else {
         setError("Erreur lors de la création de l'ordonnance.");
@@ -80,8 +81,8 @@ export default function PrescriptionForm({ patientId, onCreated }: Props) {
       {conflicts.length > 0 && (
         <div className="alert alert-error" style={{ marginBottom: 16 }}>
           <strong style={{ display: "block", marginBottom: 6 }}>⚠ Risque d'allergie détecté</strong>
-          {conflicts.map((c, i) => (
-            <div key={i} style={{ fontSize: 13 }}>
+          {conflicts.map((c) => (
+            <div key={`${c.allergen_class}-${c.medication_term}`} style={{ fontSize: 13 }}>
               <strong>{c.allergen_class}</strong> : l'ordonnance contient <em>{c.medication_term}</em>.
             </div>
           ))}
