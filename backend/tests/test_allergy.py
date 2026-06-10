@@ -44,3 +44,43 @@ def test_no_false_positive_substring():
     # "ains" ne doit PAS matcher dans "bains"
     conflicts = check_allergy_conflicts("Aspirine", "Sels pour bains de bouche")
     assert conflicts == []
+
+
+def test_check_endpoint_detects_cross_reactivity(client, patient, doctor, doctor_token):
+    res = client.post(
+        f"/patients/{patient.id}/prescriptions/check",
+        json={"medications": "Amoxicilline 500mg"},
+        headers={"Authorization": f"Bearer {doctor_token}"},
+    )
+    assert res.status_code == 200
+    conflicts = res.json()["conflicts"]
+    assert len(conflicts) == 1
+    assert conflicts[0]["allergen_class"] == "Pénicilline"
+
+
+def test_check_endpoint_no_conflict(client, patient, doctor, doctor_token):
+    res = client.post(
+        f"/patients/{patient.id}/prescriptions/check",
+        json={"medications": "Paracétamol 1g"},
+        headers={"Authorization": f"Bearer {doctor_token}"},
+    )
+    assert res.status_code == 200
+    assert res.json()["conflicts"] == []
+
+
+def test_check_endpoint_requires_doctor(client, patient, pharmacist, pharmacist_token):
+    res = client.post(
+        f"/patients/{patient.id}/prescriptions/check",
+        json={"medications": "Amoxicilline"},
+        headers={"Authorization": f"Bearer {pharmacist_token}"},
+    )
+    assert res.status_code == 403
+
+
+def test_check_endpoint_patient_not_found(client, doctor, doctor_token):
+    res = client.post(
+        "/patients/9999/prescriptions/check",
+        json={"medications": "Amoxicilline"},
+        headers={"Authorization": f"Bearer {doctor_token}"},
+    )
+    assert res.status_code == 404

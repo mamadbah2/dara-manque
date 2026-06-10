@@ -4,7 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..deps import get_db, require_doctor
 from ..models import User, Patient, Prescription, PrescriptionStatus
-from ..schemas import PatientResponse, ConsultationResponse, PrescriptionResponse, PrescriptionCreate
+from ..schemas import (
+    PatientResponse, ConsultationResponse, PrescriptionResponse,
+    PrescriptionCreate, AllergyCheckRequest, AllergyCheckResponse, AllergyConflict,
+)
+from ..allergy_rules import check_allergy_conflicts
 
 router = APIRouter(prefix="/patients", tags=["patients"])
 
@@ -44,6 +48,22 @@ def get_prescriptions(patient_id: int, db: Session = Depends(get_db)):
         )
         for p in active
     ]
+
+
+@router.post("/{patient_id}/prescriptions/check", response_model=AllergyCheckResponse)
+def check_prescription(
+    patient_id: int,
+    body: AllergyCheckRequest,
+    db: Session = Depends(get_db),
+    doctor: User = Depends(require_doctor),
+):
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    conflicts = check_allergy_conflicts(patient.allergies, body.medications)
+    return AllergyCheckResponse(
+        conflicts=[AllergyConflict(**c) for c in conflicts]
+    )
 
 
 @router.post("/{patient_id}/prescriptions", response_model=PrescriptionResponse, status_code=201)
