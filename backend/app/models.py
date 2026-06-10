@@ -63,6 +63,7 @@ class Prescription(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     medications = Column(Text, nullable=False)
     status = Column(Enum(PrescriptionStatus), nullable=False, default=PrescriptionStatus.active)
+    allergy_override = Column(Text, nullable=True)
 
     patient = relationship("Patient", back_populates="prescriptions")
     doctor = relationship("User")
