@@ -44,3 +44,18 @@ class PrescriptionResponse(BaseModel):
 
 class PrescriptionCreate(BaseModel):
     medications: str
+    override_allergy: bool = False
+
+
+class AllergyConflict(BaseModel):
+    allergen_class: str
+    allergy_term: str
+    medication_term: str
+
+
+class AllergyCheckRequest(BaseModel):
+    medications: str
+
+
+class AllergyCheckResponse(BaseModel):
+    conflicts: list[AllergyConflict]
