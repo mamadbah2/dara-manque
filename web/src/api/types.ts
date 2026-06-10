@@ -27,3 +27,9 @@ export interface AuthResponse {
   token_type: string;
   role: "doctor" | "pharmacist";
 }
+
+export interface AllergyConflict {
+  allergen_class: string;
+  allergy_term: string;
+  medication_term: string;
+}
