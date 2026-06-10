@@ -76,10 +76,21 @@ def create_prescription(
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
+
+    conflicts = check_allergy_conflicts(patient.allergies, body.medications)
+    if conflicts and not body.override_allergy:
+        raise HTTPException(status_code=409, detail={"conflicts": conflicts})
+
+    override_note = None
+    if conflicts:
+        override_note = "; ".join(
+            f"{c['allergen_class']}: {c['medication_term']}" for c in conflicts
+        )
+
     prescription = Prescription(
         id=uuid.uuid4(), patient_id=patient_id, doctor_id=doctor.id,
         created_at=datetime.utcnow(), medications=body.medications,
-        status=PrescriptionStatus.active,
+        status=PrescriptionStatus.active, allergy_override=override_note,
     )
     db.add(prescription)
     db.commit()

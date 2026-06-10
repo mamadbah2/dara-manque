@@ -84,3 +84,41 @@ def test_check_endpoint_patient_not_found(client, doctor, doctor_token):
         headers={"Authorization": f"Bearer {doctor_token}"},
     )
     assert res.status_code == 404
+
+
+def test_create_blocked_on_conflict(client, patient, doctor, doctor_token, db):
+    from app.models import Prescription
+    res = client.post(
+        f"/patients/{patient.id}/prescriptions",
+        json={"medications": "Amoxicilline 500mg"},
+        headers={"Authorization": f"Bearer {doctor_token}"},
+    )
+    assert res.status_code == 409
+    assert res.json()["detail"]["conflicts"][0]["allergen_class"] == "Pénicilline"
+    # Aucune ordonnance ne doit avoir été créée
+    assert db.query(Prescription).count() == 0
+
+
+def test_create_allowed_with_override(client, patient, doctor, doctor_token, db):
+    from app.models import Prescription
+    res = client.post(
+        f"/patients/{patient.id}/prescriptions",
+        json={"medications": "Amoxicilline 500mg", "override_allergy": True},
+        headers={"Authorization": f"Bearer {doctor_token}"},
+    )
+    assert res.status_code == 201
+    p = db.query(Prescription).one()
+    assert p.allergy_override is not None
+    assert "amoxicilline" in p.allergy_override
+
+
+def test_create_no_conflict_succeeds(client, patient, doctor, doctor_token, db):
+    from app.models import Prescription
+    res = client.post(
+        f"/patients/{patient.id}/prescriptions",
+        json={"medications": "Paracétamol 1g"},
+        headers={"Authorization": f"Bearer {doctor_token}"},
+    )
+    assert res.status_code == 201
+    p = db.query(Prescription).one()
+    assert p.allergy_override is None
