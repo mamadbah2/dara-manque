@@ -1038,13 +1038,21 @@ class _NfcCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
-                    Text(
-                      'Dara Manqué',
-                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                    Flexible(
+                      child: Text(
+                        'Dara Manqué',
+                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    Text(
-                      'CARTE SANTÉ',
-                      style: TextStyle(color: Colors.white70, fontSize: 10, letterSpacing: 1.5),
+                    SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'CARTE SANTÉ',
+                        style: TextStyle(color: Colors.white70, fontSize: 10, letterSpacing: 1.5),
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                      ),
                     ),
                   ],
                 ),
