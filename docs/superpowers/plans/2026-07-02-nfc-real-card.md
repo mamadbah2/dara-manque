@@ -265,6 +265,13 @@ Edit `mobile/android/app/src/main/AndroidManifest.xml`, add the permission and f
 
 (Only the opening `<application` line changes context — insert the two lines above immediately above it, leave the rest of the file untouched. `android:required="false"` lets the app install on devices without NFC hardware, which then use the manual-entry fallback.)
 
+> **Corrigé le 2026-07-02** après implémentation : la version réellement publiée de
+> `nfc_manager_ndef: ^1.1.0` (qui tire `ndef_record: ^1.4.2`) n'a pas de
+> `NdefRecord.createText()` ; `Ndef.read()` renvoie `Future<NdefMessage?>` (nullable) et
+> `Ndef.write()` prend un paramètre nommé `message:`. Le code ci-dessous construit le
+> record texte NDEF manuellement (RTD "T", cf. `_createTextRecord`) — vérifié contre le
+> code source installé sous `~/.pub-cache/hosted/pub.dev/`.
+
 - [ ] **Step 4: Write the real implementation**
 
 Create `mobile/lib/nfc/nfc_card_reader.dart`:
@@ -275,6 +282,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:nfc_manager/nfc_manager.dart';
+import 'package:nfc_manager/ndef_record.dart';
 import 'package:nfc_manager_ndef/nfc_manager_ndef.dart';
 
 import 'card_reader.dart';
@@ -285,6 +293,8 @@ class NfcCardReader implements CardReader {
     NfcPollingOption.iso15693,
     NfcPollingOption.iso18092,
   };
+
+  static const _language = 'en';
 
   Completer<String>? _pendingRead;
   Completer<void>? _pendingWrite;
@@ -308,7 +318,7 @@ class NfcCardReader implements CardReader {
             throw const FormatException("Ce tag n'est pas au format NDEF.");
           }
           final message = await ndef.read();
-          if (message.records.isEmpty) {
+          if (message == null || message.records.isEmpty) {
             throw const FormatException('Tag NFC vide.');
           }
           final id = _decodeTextPayload(message.records.first.payload);
@@ -335,7 +345,7 @@ class NfcCardReader implements CardReader {
           if (ndef == null) {
             throw const FormatException('Ce tag ne supporte pas NDEF.');
           }
-          await ndef.write(NdefMessage([NdefRecord.createText(id)]));
+          await ndef.write(message: NdefMessage(records: [_createTextRecord(id)]));
           if (!completer.isCompleted) completer.complete();
         } catch (e) {
           if (!completer.isCompleted) completer.completeError(e);
@@ -358,9 +368,26 @@ class NfcCardReader implements CardReader {
     }
   }
 
+  /// Construit un record NDEF "Text" (RTD "T") en UTF-8, langue "en".
+  NdefRecord _createTextRecord(String text) {
+    final languageBytes = utf8.encode(_language);
+    final textBytes = utf8.encode(text);
+    final payload = Uint8List.fromList([
+      languageBytes.length,
+      ...languageBytes,
+      ...textBytes,
+    ]);
+    return NdefRecord(
+      typeNameFormat: TypeNameFormat.wellKnown,
+      type: Uint8List.fromList('T'.codeUnits),
+      identifier: Uint8List(0),
+      payload: payload,
+    );
+  }
+
   /// Décode un payload de record NDEF texte (statut + code langue + texte).
-  /// On suppose un encodage UTF-8 : tous nos tags sont écrits par writeCardId,
-  /// qui utilise NdefRecord.createText en UTF-8 par défaut.
+  /// On suppose un encodage UTF-8 : tous nos tags sont écrits par _createTextRecord,
+  /// qui encode en UTF-8 par défaut.
   String _decodeTextPayload(Uint8List payload) {
     if (payload.isEmpty) {
       throw const FormatException('Tag NFC vide.');
