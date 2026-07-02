@@ -27,4 +27,23 @@ void main() {
 
     expect(find.text('Carte programmée avec succès.'), findsOneWidget);
   });
+
+  testWidgets('clears stale success banner when a later submission fails validation', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: CardWriteScreen(cardReader: MockCardReader(delay: Duration.zero)),
+    ));
+
+    await tester.enterText(find.byType(TextField), '1001');
+    await tester.tap(find.text('Écrire sur la carte'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Carte programmée avec succès.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'abc');
+    await tester.tap(find.text('Écrire sur la carte'));
+    await tester.pump();
+
+    expect(find.text('Carte programmée avec succès.'), findsNothing);
+    expect(find.text('Identifiant de carte invalide.'), findsOneWidget);
+  });
 }

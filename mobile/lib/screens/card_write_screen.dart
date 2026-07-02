@@ -29,7 +29,10 @@ class _CardWriteScreenState extends State<CardWriteScreen> {
     try {
       parseCardId(text);
     } on FormatException catch (e) {
-      setState(() => _error = e.message);
+      setState(() {
+        _error = e.message;
+        _success = false;
+      });
       return;
     }
     setState(() {
