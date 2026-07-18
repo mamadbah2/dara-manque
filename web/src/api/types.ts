@@ -4,6 +4,22 @@ export interface Patient {
   date_of_birth: string | null;
   allergies: string | null;
   chronic_conditions: string | null;
+  card_uid?: string | null;
+}
+
+export interface PatientCreate {
+  full_name: string;
+  date_of_birth?: string | null;
+  allergies?: string | null;
+  chronic_conditions?: string | null;
+  card_uid?: string | null;
+}
+
+export interface LastScan {
+  seq: number;
+  uid: string | null;
+  known: boolean;
+  patient: Patient | null;
 }
 
 export interface Consultation {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { AuthResponse, Patient, Consultation, Prescription, AllergyConflict } from "./types";
+import type { AuthResponse, Patient, PatientCreate, LastScan, Consultation, Prescription, AllergyConflict } from "./types";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:9000",
@@ -16,6 +16,12 @@ export const login = (email: string, password: string) =>
 
 export const getPatient = (id: number) =>
   api.get<Patient>(`/patients/${id}`);
+
+export const createPatient = (payload: PatientCreate) =>
+  api.post<Patient>("/patients", payload);
+
+export const getLastScan = () =>
+  api.get<LastScan>("/cards/last-scan");
 
 export const getConsultations = (patientId: number) =>
   api.get<Consultation[]>(`/patients/${patientId}/consultations`);
