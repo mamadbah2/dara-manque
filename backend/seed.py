@@ -3,6 +3,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from sqlalchemy import text
 from app.database import SessionLocal, engine
 from app.models import Base, User, Patient, Consultation, Prescription, PrescriptionStatus, Role
 from app.security import hash_password
@@ -35,6 +36,7 @@ patient = Patient(
     date_of_birth=date(1985, 3, 12),
     allergies="Pénicilline",
     chronic_conditions="Diabète type 2",
+    card_uid="1001",
 )
 db.add(patient)
 db.commit()
@@ -60,6 +62,12 @@ p1 = Prescription(
     status=PrescriptionStatus.active,
 )
 db.add(p1)
+db.commit()
+
+# The patient above is inserted with an explicit id (1001), which does NOT
+# advance the SERIAL sequence. Without this, auto-generated ids restart at 1
+# and eventually collide at 1001. Realign the sequence to max(id).
+db.execute(text("SELECT setval('patients_id_seq', (SELECT MAX(id) FROM patients))"))
 db.commit()
 
 print("Seed complete!")
