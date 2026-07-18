@@ -35,6 +35,7 @@ class Patient(Base):
     date_of_birth = Column(Date, nullable=True)
     allergies = Column(Text, nullable=True)
     chronic_conditions = Column(Text, nullable=True)
+    card_uid = Column(String, unique=True, index=True, nullable=True)
 
     consultations = relationship("Consultation", back_populates="patient")
     prescriptions = relationship("Prescription", back_populates="patient")

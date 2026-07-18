@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import date, datetime
 from typing import Optional
 from uuid import UUID
@@ -22,8 +22,34 @@ class PatientResponse(BaseModel):
     date_of_birth: Optional[date] = None
     allergies: Optional[str] = None
     chronic_conditions: Optional[str] = None
+    card_uid: Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+
+class PatientCreate(BaseModel):
+    full_name: str
+    date_of_birth: Optional[date] = None
+    allergies: Optional[str] = None
+    chronic_conditions: Optional[str] = None
+    card_uid: Optional[str] = None
+
+
+class CardScanRequest(BaseModel):
+    uid: str
+
+    @field_validator("uid")
+    @classmethod
+    def uid_not_blank(cls, v: str) -> str:
+        if not v or not v.strip().replace(":", "").replace("-", "").replace(" ", ""):
+            raise ValueError("UID vide.")
+        return v
+
+
+class CardScanResponse(BaseModel):
+    uid: str
+    known: bool
+    patient: Optional[PatientResponse] = None
 
 
 class ConsultationResponse(BaseModel):

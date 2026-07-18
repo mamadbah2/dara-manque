@@ -7,10 +7,38 @@ from ..models import User, Patient, Prescription, PrescriptionStatus
 from ..schemas import (
     PatientResponse, ConsultationResponse, PrescriptionResponse,
     PrescriptionCreate, AllergyCheckRequest, AllergyCheckResponse, AllergyConflict,
+    PatientCreate,
 )
 from ..allergy_rules import check_allergy_conflicts
+from ..card_utils import normalize_uid
 
 router = APIRouter(prefix="/patients", tags=["patients"])
+
+
+@router.post("", response_model=PatientResponse, status_code=201)
+def create_patient(
+    body: PatientCreate,
+    db: Session = Depends(get_db),
+    doctor: User = Depends(require_doctor),
+):
+    """Enroll a new patient. For now the doctor is the card issuer: an optional
+    `card_uid` (read from the hardware reader) links the physical card to the
+    dossier at creation time."""
+    card_uid = normalize_uid(body.card_uid) if body.card_uid else None
+    if card_uid and db.query(Patient).filter(Patient.card_uid == card_uid).first():
+        raise HTTPException(status_code=409, detail="Carte déjà associée à un patient")
+
+    patient = Patient(
+        full_name=body.full_name,
+        date_of_birth=body.date_of_birth,
+        allergies=body.allergies,
+        chronic_conditions=body.chronic_conditions,
+        card_uid=card_uid,
+    )
+    db.add(patient)
+    db.commit()
+    db.refresh(patient)
+    return patient
 
 
 @router.get("/{patient_id}", response_model=PatientResponse)

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import auth, patients, prescriptions
+from .routers import auth, patients, prescriptions, cards
 
 app = FastAPI(title="Dara Manqué API", version="1.0.0")
 
@@ -14,6 +14,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(patients.router)
 app.include_router(prescriptions.router)
+app.include_router(cards.router)
 
 @app.get("/health")
 def health():
