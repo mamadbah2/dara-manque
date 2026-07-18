@@ -52,6 +52,13 @@ class CardScanResponse(BaseModel):
     patient: Optional[PatientResponse] = None
 
 
+class LastScanResponse(BaseModel):
+    seq: int
+    uid: Optional[str] = None
+    known: bool = False
+    patient: Optional[PatientResponse] = None
+
+
 class ConsultationResponse(BaseModel):
     id: UUID
     date: datetime

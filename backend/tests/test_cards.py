@@ -99,6 +99,36 @@ def test_enroll_duplicate_card_conflicts(client, db, doctor_token):
     assert res.status_code == 409
 
 
+# --- GET /cards/last-scan (bridge: reader -> web dashboard) ---
+
+def test_last_scan_reflects_a_known_scan(client, db):
+    _make_carded_patient(db)
+    before = client.get("/cards/last-scan").json()["seq"]
+    client.post("/cards/scan", json={"uid": "04:a2:b3:c1"})
+    after = client.get("/cards/last-scan").json()
+    assert after["seq"] == before + 1
+    assert after["known"] is True
+    assert after["uid"] == "04A2B3C1"
+    assert after["patient"]["id"] == 2001
+
+
+def test_last_scan_reflects_an_unknown_scan(client, db):
+    before = client.get("/cards/last-scan").json()["seq"]
+    client.post("/cards/scan", json={"uid": "12345678"})
+    after = client.get("/cards/last-scan").json()
+    assert after["seq"] == before + 1
+    assert after["known"] is False
+    assert after["uid"] == "12345678"
+    assert after["patient"] is None
+
+
+def test_last_scan_seq_increments_per_scan(client, db):
+    s0 = client.get("/cards/last-scan").json()["seq"]
+    client.post("/cards/scan", json={"uid": "AAAA"})
+    client.post("/cards/scan", json={"uid": "BBBB"})
+    assert client.get("/cards/last-scan").json()["seq"] == s0 + 2
+
+
 def test_enroll_without_card_allowed(client, db, doctor_token):
     res = client.post(
         "/patients",
