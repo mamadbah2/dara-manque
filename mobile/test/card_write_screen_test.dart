@@ -9,7 +9,7 @@ void main() {
       home: CardWriteScreen(cardReader: MockCardReader(delay: Duration.zero)),
     ));
 
-    await tester.enterText(find.byType(TextField), 'abc');
+    await tester.enterText(find.byType(TextField), 'xyz');
     await tester.tap(find.text('Écrire sur la carte'));
     await tester.pump();
 
@@ -39,7 +39,7 @@ void main() {
 
     expect(find.text('Carte programmée avec succès.'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField), 'abc');
+    await tester.enterText(find.byType(TextField), 'xyz');
     await tester.tap(find.text('Écrire sur la carte'));
     await tester.pump();
 

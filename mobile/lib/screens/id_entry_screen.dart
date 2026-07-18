@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api/client.dart';
+import '../api/models.dart';
 import '../nfc/card_id.dart';
 import '../nfc/card_reader.dart';
 import '../nfc/card_reader_factory.dart';
@@ -52,7 +53,7 @@ class _IdEntryScreenState extends State<IdEntryScreen> {
       setState(() => _error = 'Veuillez entrer un identifiant valide.');
       return;
     }
-    await _loadPatient(id);
+    await _openPatient(() => fetchPatient(id));
   }
 
   Future<void> _scanCard() async {
@@ -62,8 +63,8 @@ class _IdEntryScreenState extends State<IdEntryScreen> {
     });
     try {
       final payload = await _cardReader.readCardId();
-      final id = parseCardId(payload);
-      await _loadPatient(id);
+      final uid = parseCardId(payload);
+      await _openPatient(() => scanCard(uid));
     } catch (e) {
       if (mounted) {
         final message = e is FormatException ? e.message : e.toString().replaceAll('Exception: ', '');
@@ -74,13 +75,13 @@ class _IdEntryScreenState extends State<IdEntryScreen> {
     }
   }
 
-  Future<void> _loadPatient(int id) async {
+  Future<void> _openPatient(Future<Patient> Function() load) async {
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      final patient = await fetchPatient(id);
+      final patient = await load();
       if (!mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => HomeScreen(patient: patient)),

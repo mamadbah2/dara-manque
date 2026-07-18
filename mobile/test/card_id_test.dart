@@ -3,12 +3,24 @@ import 'package:mobile/nfc/card_id.dart';
 
 void main() {
   group('parseCardId', () {
-    test('parses a plain numeric string', () {
-      expect(parseCardId('1001'), 1001);
+    test('normalizes a hex UID with colon separators', () {
+      expect(parseCardId('04:a2:b3:c1'), '04A2B3C1');
+    });
+
+    test('uppercases a lowercase hex UID', () {
+      expect(parseCardId('deadbeef'), 'DEADBEEF');
+    });
+
+    test('strips space and dash separators', () {
+      expect(parseCardId('04 A2-B3 C1'), '04A2B3C1');
+    });
+
+    test('accepts a plain numeric string', () {
+      expect(parseCardId('1001'), '1001');
     });
 
     test('trims surrounding whitespace', () {
-      expect(parseCardId(' 1001 '), 1001);
+      expect(parseCardId(' 04A2B3C1 '), '04A2B3C1');
     });
 
     test('throws FormatException on empty payload', () {
@@ -19,12 +31,8 @@ void main() {
       expect(() => parseCardId('   '), throwsFormatException);
     });
 
-    test('throws FormatException on non-numeric payload', () {
-      expect(() => parseCardId('abc'), throwsFormatException);
-    });
-
-    test('throws FormatException on mixed alphanumeric payload', () {
-      expect(() => parseCardId('10a1'), throwsFormatException);
+    test('throws FormatException on non-hex payload', () {
+      expect(() => parseCardId('xyz'), throwsFormatException);
     });
   });
 }

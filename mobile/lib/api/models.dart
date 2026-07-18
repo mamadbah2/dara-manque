@@ -4,6 +4,7 @@ class Patient {
   final String? dateOfBirth;
   final String? allergies;
   final String? chronicConditions;
+  final String? cardUid;
 
   const Patient({
     required this.id,
@@ -11,6 +12,7 @@ class Patient {
     this.dateOfBirth,
     this.allergies,
     this.chronicConditions,
+    this.cardUid,
   });
 
   factory Patient.fromJson(Map<String, dynamic> json) => Patient(
@@ -19,6 +21,7 @@ class Patient {
         dateOfBirth: json['date_of_birth'] as String?,
         allergies: json['allergies'] as String?,
         chronicConditions: json['chronic_conditions'] as String?,
+        cardUid: json['card_uid'] as String?,
       );
 }
 
