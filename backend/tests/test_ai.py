@@ -58,3 +58,24 @@ def test_detect_fraud_sorted_and_bounded():
             "patient", "visites", "medecins_distincts",
             "hopitaux_distincts", "medicaments_distincts", "score",
         }
+
+
+def test_affluence_endpoint_requires_auth(client):
+    res = client.get("/ai/affluence")
+    assert res.status_code in (401, 403)
+
+
+def test_affluence_endpoint_ok(client, doctor_token):
+    res = client.get("/ai/affluence", headers={"Authorization": f"Bearer {doctor_token}"})
+    assert res.status_code == 200
+    body = res.json()
+    assert len(body["forecast"]) == 30
+    assert "kpis" in body
+
+
+def test_fraud_endpoint_ok(client, pharmacist_token):
+    res = client.get("/ai/fraud", headers={"Authorization": f"Bearer {pharmacist_token}"})
+    assert res.status_code == 200
+    body = res.json()
+    assert "total" in body
+    assert isinstance(body["suspects"], list)
