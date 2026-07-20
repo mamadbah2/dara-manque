@@ -33,3 +33,28 @@ def test_feature_csvs_have_expected_schema():
         "Unique_Medications",
     ]
     assert len(fraud) > 0
+
+
+from app.ai import engine
+
+
+def test_predict_affluence_shape():
+    result = engine.predict_affluence(horizon=30)
+    assert len(result["forecast"]) == 30
+    assert all(p["predicted_patients"] >= 0 for p in result["forecast"])
+    assert set(result["kpis"]) == {"peak", "peak_date", "average"}
+    assert len(result["history"]) > 0
+
+
+def test_detect_fraud_sorted_and_bounded():
+    result = engine.detect_fraud(top=50)
+    assert result["total"] >= 0
+    assert len(result["suspects"]) <= 50
+    scores = [s["score"] for s in result["suspects"]]
+    assert scores == sorted(scores)  # plus anormal (score le plus bas) en tête
+    if result["suspects"]:
+        s = result["suspects"][0]
+        assert set(s) == {
+            "patient", "visites", "medecins_distincts",
+            "hopitaux_distincts", "medicaments_distincts", "score",
+        }
