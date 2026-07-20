@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { AuthResponse, Patient, PatientCreate, LastScan, Consultation, Prescription, AllergyConflict } from "./types";
+import type { AuthResponse, Patient, PatientCreate, LastScan, Consultation, Prescription, AllergyConflict, AffluenceResponse, FraudResponse } from "./types";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:9000",
@@ -43,3 +43,9 @@ export const checkPrescription = (patientId: number, medications: string) =>
 
 export const treatPrescription = (prescriptionId: string) =>
   api.patch<Prescription>(`/prescriptions/${prescriptionId}/treat`);
+
+export const getAffluence = () =>
+  api.get<AffluenceResponse>("/ai/affluence");
+
+export const getFraud = () =>
+  api.get<FraudResponse>("/ai/fraud");

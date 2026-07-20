@@ -49,3 +49,33 @@ export interface AllergyConflict {
   allergy_term: string;
   medication_term: string;
 }
+
+export interface AffluencePoint {
+  date: string;
+  patients: number;
+}
+
+export interface ForecastPoint {
+  date: string;
+  predicted_patients: number;
+}
+
+export interface AffluenceResponse {
+  history: AffluencePoint[];
+  forecast: ForecastPoint[];
+  kpis: { peak: number; peak_date: string; average: number };
+}
+
+export interface FraudSuspect {
+  patient: string;
+  visites: number;
+  medecins_distincts: number;
+  hopitaux_distincts: number;
+  medicaments_distincts: number;
+  score: number;
+}
+
+export interface FraudResponse {
+  total: number;
+  suspects: FraudSuspect[];
+}
