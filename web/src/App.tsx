@@ -3,6 +3,7 @@ import LoginPage from "./pages/LoginPage";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import PharmacistDashboard from "./pages/pharmacist/PharmacistDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 
 export default function App() {
   return (
@@ -22,6 +23,14 @@ export default function App() {
           element={
             <ProtectedRoute allowedRole="pharmacist">
               <PharmacistDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <AnalyticsPage />
             </ProtectedRoute>
           }
         />

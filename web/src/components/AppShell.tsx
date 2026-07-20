@@ -35,6 +35,9 @@ export default function AppShell({ role, children }: Props) {
           <span style={{ fontWeight: 700, fontSize: 16, color: "var(--text)" }}>Dara Manqué</span>
         </div>
         <div className="flex items-center gap-3">
+          <button className="btn btn-ghost btn-sm" onClick={() => navigate("/analytics")}>
+            🤖 Analytics IA
+          </button>
           <span className="badge badge-info">{roleLabel}</span>
           {email && <span className="text-muted" style={{ fontSize: 13 }}>{email}</span>}
           <button className="btn btn-ghost btn-sm" onClick={handleSignOut}>
